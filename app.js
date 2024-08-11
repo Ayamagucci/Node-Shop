@@ -1,9 +1,21 @@
-// some core modules: http, https, fs, path, os
-const http = require('http');
+const path = require('path');
+const express = require('express');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
-const routes = require('./routes');
+const app = express();
+app.use(express.urlencoded({ extended: false })); // parses reqs w/ URL-encoded payloads (default encoding type for HTML forms)
 
-// accepts req listener —> returns Server instance
-const server = http.createServer(routes);
+app.use(express.static(path.join(__dirname, 'public')));
+// NOTE: can serve multiple static folders —> file lookups resolve to first match **
 
-server.listen(3000); // localhost:3000
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
+
+app.use((_, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'views', 'error.html'));
+});
+
+const server = app.listen(3000, () => {
+  console.log('Server listening at PORT: 3000');
+});
