@@ -1,23 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const rootDir = require('../util/path');
+
+const products = [];
 
 router.get('/add-product', (_, res) => {
-  res
-    .status(200)
-    /*
-    .send(
-      '<form action="/admin/add-product" method="POST"><input type="text" name="title" /><button type="submit">Add Product</button></form>'
-      // NOTE: form action —> "/admin/" prefix!
-    )
-    */
-    .sendFile(path.join(rootDir, 'views', 'add-product.html'));
+  // PUG + EJS
+  res.status(200).render('add-product', {
+    pageTitle: 'Add Product',
+    path: '/admin/add-product'
+  });
+
+  /* HANDLEBARS
+  res.status(200).render('add-product', {
+    pageTitle: 'Add Product',
+    path: '/admin/add-product',
+    formCSS: true,
+    productCSS: true,
+    activeAddProduct: true
+  });
+  */
 });
 
 router.post('/add-product', (req, res) => {
-  console.log(req.body); // [Object: null prototype] { title: '...' }
+  products.push({ title: req.body.title });
   res.status(201).redirect('/');
 });
 
-module.exports = router;
+module.exports = {
+  adminRoutes: router,
+  products
+};
