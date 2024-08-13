@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const shopRoutes = require('./routes/shop');
 const adminRoutes = require('./routes/admin');
-const { renderError } = require('./controllers/products');
+const { renderError } = require('./controllers/error');
 
 const app = express();
 
@@ -16,6 +16,6 @@ app.use(shopRoutes);
 
 app.use(renderError);
 
-const server = app.listen(3000, () => {
+app.listen(3000, () => {
   console.log('Server listening at PORT: 3000');
 });

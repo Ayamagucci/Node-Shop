@@ -1,5 +1,5 @@
 {
-  "name": "5-mvc",
+  "name": "6-enhancing",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",

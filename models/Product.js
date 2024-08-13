@@ -15,19 +15,20 @@ const readProducts = (cb) => {
 };
 
 module.exports = class Product {
-  constructor(title) {
+  constructor(title, imgURL, description, price) {
     this.title = title;
+    this.imgURL = imgURL;
+    this.description = description;
+    this.price = price;
   }
 
   save(cb) {
     readProducts((products) => {
-      // pushes instance into empty array OR parsed array
-      products.push(this); // NOTE: (this == instance) since arrow fn!
+      products.push(this);
 
-      // stringifies array —> writes to file
       fs.writeFile(dataPath, JSON.stringify(products), (err) => {
         if (err) console.error(err);
-        if (cb) cb(); // redirects afterwards
+        if (cb) cb(); // ensures redirect happens only after writing file
       });
     });
   }
