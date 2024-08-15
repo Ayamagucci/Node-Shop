@@ -1,8 +1,41 @@
 <%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css" />
   </head>
 
   <body>
     <%- include('../includes/nav.ejs') %>
     <main>
-      <h1>Nothing there!</h1>
+      <% if (products.length > 0) { %>
+        <div class="grid">
+          <% for (const { title, imgURL, quantity, price, description, id } of products) { %>
+            <article class="card product-item">
+              <header class="card__header">
+                <h1 class="product__title"><%= title %> (<%= quantity %>)</h1>
+              </header>
+              <div class="card__image">
+                <img
+                  src="<%= imgURL %>"
+                  alt="<%= title %>"
+                />
+              </div>
+              <div class="card__content">
+                <h2 class="product__price">$<%= price * quantity %></h2>
+                <p class="product__description">
+                  <%= description %>
+                </p>
+              </div>
+              <div class="card__actions">
+                <a href="/products/<%= id %>" class="btn">Details</a>
+                <form action="/cart/remove" method="POST">
+                  <button class="btn" type="submit">Remove</button>
+                  <input type="hidden" name="id" value="<%= id %>" />
+                </form>
+              </div>
+            </article>
+          <% } %>
+        </div>
+      <% } else { %>
+        <h1>No Products in Cart!</h1>
+        <a href="/products" class="btn">Add Some</a>
+      <% } %>
 <%- include('../includes/end.ejs') %>

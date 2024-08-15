@@ -1,5 +1,5 @@
 {
-  "name": "6-enhancing",
+  "name": "7-dynamic-routes-advanced-models",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
