@@ -1,28 +1,5 @@
-// interacts w/ products.json file **
-const fs = require('fs');
-const { productsPath } = require('../util/path');
-
-const readProducts = (cb) => {
-  fs.readFile(productsPath, (err, content) => {
-    if (err || !content) {
-      console.warn(
-        `Error reading products.json or empty content. Initializing new cart...`
-      );
-      cb([]);
-    } else {
-      cb(JSON.parse(content));
-    }
-  });
-};
-const writeProducts = (products, cb) => {
-  fs.writeFile(productsPath, JSON.stringify(products), (err) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    if (cb) cb(); // ensures cb always execs after writing file **
-  });
-};
+// fully integrated w/ DB! **
+const db = require('../util/db');
 
 module.exports = class Product {
   constructor(id, title, imgURL, description, price) {
@@ -33,51 +10,55 @@ module.exports = class Product {
     this.price = price;
   }
 
-  static fetchAll(cb) {
-    readProducts(cb);
+  static async fetchAll() {
+    try {
+      const [products] = await db.execute('SELECT * FROM products');
+      return products;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static findByID(id, cb) {
-    readProducts((products) => {
-      const product = products.find((prod) => prod.id === id);
-      if (!product) {
-        console.warn(`No product w/ ID ${id} found!`);
-        return;
-      }
-      if (cb) cb(product);
-    });
+  static async findByID(id) {
+    try {
+      const [product] = await db.execute(
+        // query method that helps prevent SQL injection attacks **
+        'SELECT * FROM products WHERE products.id = ?',
+        [id]
+      );
+      return product[0];
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static deleteByID(id, cb) {
-    readProducts((products) => {
-      const product = products.find((prod) => prod.id === id);
-      if (!product) {
-        console.warn(`No product w/ ID ${id} found!`);
-        return;
-      }
-      const updatedProducts = products.filter((product) => product.id !== id);
-      writeProducts(updatedProducts, cb);
-    });
+  static async deleteByID(id) {
+    try {
+      await db.execute('DELETE FROM products WHERE products.id = ?', [id]);
+      return `Product w/ ID ${id} successfully deleted!`;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  save(cb) {
-    readProducts((products) => {
-      if (this.id) {
-        const existingIndex = products.findIndex(
-          (product) => product.id === this.id
+  async save() {
+    const { id, title, price, description, imgURL } = this;
+    try {
+      if (!id) {
+        await db.execute(
+          'INSERT INTO products (title, price, description, imgURL) VALUES (?, ?, ?, ?)',
+          [title, price, description, imgURL]
         );
-        if (existingIndex >= 0) {
-          products[existingIndex] = this;
-        } else {
-          console.warn(`Product w/ ID ${this.id} not found!`);
-          if (cb) cb(null);
-          return;
-        }
+        return `Product (${title}) successfully added!`;
       } else {
-        this.id = Math.random().toString();
-        products.push(this);
+        await db.execute(
+          'UPDATE products SET title = ?, price = ?, description = ?, imgURL = ? WHERE id = ?',
+          [title, price, description, imgURL, id]
+        );
+        return `Product (${title}) successfully edited!`;
       }
-      writeProducts(products, cb);
-    });
+    } catch (err) {
+      throw err;
+    }
   }
 };

@@ -1,4 +1,3 @@
-// interacts w/ cart.json file **
 const fs = require('fs');
 const { cartPath } = require('../util/path');
 
@@ -20,7 +19,7 @@ const writeCart = (cart, cb) => {
       console.error(err);
       return;
     }
-    if (cb) cb(); // ensures cb always execs after writing file **
+    if (cb) cb();
   });
 };
 

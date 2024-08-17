@@ -2,34 +2,46 @@ const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 
 module.exports = {
-  renderIndex(_, res) {
-    Product.fetchAll((products) => {
+  // only modified 'renderIndex', 'renderProducts', 'renderDetails'
+  async renderIndex(_, res) {
+    try {
       res.status(200).render('shop/index', {
         pageTitle: 'Shop',
         path: '/',
-        products
+        products: await Product.fetchAll()
       });
-    });
+    } catch (err) {
+      console.error(err);
+      res.status(500).render('error', { pageTitle: 'Index Error', path: '' });
+    }
   },
-  renderProducts(_, res) {
-    Product.fetchAll((products) => {
+  async renderProducts(_, res) {
+    try {
       res.status(200).render('shop/product-list', {
         pageTitle: 'All Products',
         path: '/products',
-        products
+        products: await Product.fetchAll()
       });
-    });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .render('error', { pageTitle: 'Products Error', path: '' });
+    }
   },
-  renderDetails(req, res) {
+  async renderDetails(req, res) {
     const { id } = req.params;
-
-    Product.findByID(id, (product) => {
+    const product = await Product.findByID(id);
+    try {
       res.status(200).render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
         product
       });
-    });
+    } catch (err) {
+      console.error(err);
+      res.status(500).render('error', { pageTitle: 'Details Error', path: '' });
+    }
   },
   renderOrders(_, res) {
     res.status(200).render('shop/orders', {

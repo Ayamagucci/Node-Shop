@@ -1,8 +1,10 @@
+// only modified files: db.js, Product.js, shop.js
 const path = require('path');
 const express = require('express');
 const shopRoutes = require('./routes/shop');
 const adminRoutes = require('./routes/admin');
 const { renderError } = require('./controllers/error');
+const db = require('./util/db');
 
 const app = express();
 
