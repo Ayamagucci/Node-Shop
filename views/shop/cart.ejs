@@ -7,10 +7,10 @@
     <main>
       <% if (products.length > 0) { %>
         <div class="grid">
-          <% for (const { title, imgURL, quantity, price, description, id } of products) { %>
+          <% for (const { title, imgURL, cartItem, price, description, id } of products) { %>
             <article class="card product-item">
               <header class="card__header">
-                <h1 class="product__title"><%= title %> (<%= quantity %>)</h1>
+                <h1 class="product__title"><%= title %> (<%= cartItem.quantity %>)</h1>
               </header>
               <div class="card__image">
                 <img
@@ -19,7 +19,7 @@
                 />
               </div>
               <div class="card__content">
-                <h2 class="product__price">$<%= price * quantity %></h2>
+                <h2 class="product__price">$<%= price * cartItem.quantity %></h2>
                 <p class="product__description">
                   <%= description %>
                 </p>
@@ -33,6 +33,11 @@
               </div>
             </article>
           <% } %>
+        </div>
+        <div class="centered">
+          <form action="/orders" method="POST">
+            <button class="btn" type="submit">Checkout</button>
+          </form>
         </div>
       <% } else { %>
         <h1>No Products in Cart!</h1>

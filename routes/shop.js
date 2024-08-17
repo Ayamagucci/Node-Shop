@@ -5,6 +5,7 @@ const {
   renderProducts,
   renderDetails,
   renderOrders,
+  postOrder,
   renderCheckout,
   renderCart,
   addToCart,
@@ -14,11 +15,12 @@ const {
 router.get('/', renderIndex);
 router.get('/products', renderProducts);
 router.get('/products/:id', renderDetails);
+router.get('/cart', renderCart);
 router.get('/orders', renderOrders);
 router.get('/checkout', renderCheckout);
-router.get('/cart', renderCart);
 
 router.post('/cart', addToCart);
 router.post('/cart/remove', removeFromCart);
+router.post('/orders', postOrder);
 
 module.exports = router;
