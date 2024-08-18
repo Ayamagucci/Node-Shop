@@ -1,5 +1,4 @@
 const Product = require('../models/Product');
-const OrderItem = require('../models/OrderItem');
 
 module.exports = {
   async renderIndex(_, res) {
@@ -33,25 +32,56 @@ module.exports = {
   async renderDetails(req, res) {
     const { id } = req.params;
     try {
-      // NOTE: Sequelize performs type coercion BTS, but still good practice to convert!
-      const product = await Product.findByPk(+id);
-      // const [product] = await Product.findAll({ where: { id: +id } });
-
+      const product = await Product.findById(id);
       res.status(200).render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
         product
       });
     } catch (err) {
-      console.error(`Error rendering Product (${title}) Details:`, err);
+      console.error(`Error rendering Product Details:`, err);
       res.status(500).render('error', { pageTitle: 'Details Error', path: '' });
+    }
+  },
+  async renderCart(req, res) {
+    try {
+      const products = await req.user.getCartItemData();
+      res.status(200).render('shop/cart', {
+        pageTitle: 'Your Cart',
+        path: '/cart',
+        totalPrice: req.user.cart.totalPrice,
+        products
+      });
+    } catch (err) {
+      console.error('Failed to fetch product data for Cart:', err);
+      res.status(500).render('error', { pageTitle: 'Cart Error', path: '' });
+    }
+  },
+  async addToCart(req, res) {
+    const { id } = req.body;
+    try {
+      const product = await Product.findById(id);
+      await req.user.addToUserCart(product);
+      res.status(201).redirect('/cart');
+    } catch (err) {
+      console.error('Error adding to Cart:', err);
+      res.status(500).render('error', { pageTitle: 'Cart Error', path: '' });
+    }
+  },
+  async removeFromCart(req, res) {
+    const { id } = req.body;
+    try {
+      const product = await Product.findById(id);
+      await req.user.removeFromUserCart(product);
+      res.status(204).redirect('/cart');
+    } catch (err) {
+      console.error('Error removing item from Cart:', err);
+      res.status(500).render('error', { pageTitle: 'Cart Error', path: '' });
     }
   },
   async renderOrders(req, res) {
     try {
-      const orders = await req.user.getOrders({ include: ['products'] });
-      console.log('Orders:', orders);
-
+      const orders = await req.user.getOrders();
       res.status(200).render('shop/orders', {
         pageTitle: 'Your Orders',
         path: '/orders',
@@ -64,21 +94,7 @@ module.exports = {
   },
   async postOrder(req, res) {
     try {
-      const cart = await req.user.getCart();
-      const products = await cart.getProducts();
-
-      const order = await req.user.createOrder();
-      const orderItems = products.map((product) => ({
-        orderId: order.id,
-        productId: product.id,
-        quantity: product.cartItem.quantity
-      }));
-
-      // bulkCreate —> multiple items added at once
-      await OrderItem.bulkCreate(orderItems);
-
-      await cart.setProducts(null); // clears cart
-
+      await req.user.addOrder();
       res.status(201).redirect('/orders');
     } catch (err) {
       console.error('Error posting Order:', err);
@@ -92,52 +108,5 @@ module.exports = {
       pageTitle: 'Checkout',
       path: '/checkout'
     });
-  },
-  async renderCart(req, res) {
-    try {
-      const cart = await req.user.getCart();
-      const products = await cart.getProducts();
-
-      res.status(200).render('shop/cart', {
-        pageTitle: 'Your Cart',
-        path: '/cart',
-        products
-      });
-    } catch (err) {
-      console.error('Error rendering Cart:', err);
-      res.status(500).render('error', { pageTitle: 'Cart Error', path: '' });
-    }
-  },
-  async addToCart(req, res) {
-    const { id } = req.body;
-    try {
-      const cart = await req.user.getCart();
-      let [product] = await cart.getProducts({ where: { id: +id } });
-
-      if (product) {
-        const newQuantity = product.cartItem.quantity + 1; // every product in cart —> related cartItem that includes its quantity **
-        await product.cartItem.update({ quantity: newQuantity });
-      } else {
-        product = await Product.findByPk(+id);
-        await cart.addProduct(product, { through: { quantity: 1 } }); // through CartItem w/ quantity of 1 **
-      }
-      res.status(201).redirect('/cart');
-    } catch (err) {
-      console.error('Error adding to Cart:', err);
-      res.status(500).render('error', { pageTitle: 'Cart Error', path: '' });
-    }
-  },
-  async removeFromCart(req, res) {
-    const { id } = req.body;
-    try {
-      const cart = await req.user.getCart();
-      const [product] = await cart.getProducts({ where: { id: +id } });
-
-      await product.cartItem.destroy();
-      res.status(204).redirect('/cart');
-    } catch (err) {
-      console.error('Error removing item from Cart:', err);
-      res.status(500).render('error', { pageTitle: 'Cart Error', path: '' });
-    }
   }
 };

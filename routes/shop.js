@@ -4,12 +4,12 @@ const {
   renderIndex,
   renderProducts,
   renderDetails,
-  renderOrders,
-  postOrder,
-  renderCheckout,
   renderCart,
   addToCart,
-  removeFromCart
+  removeFromCart,
+  renderOrders,
+  postOrder,
+  renderCheckout
 } = require('../controllers/shop');
 
 router.get('/', renderIndex);

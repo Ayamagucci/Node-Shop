@@ -1,13 +1,9 @@
 const Product = require('../models/Product');
-const Cart = require('../models/Cart');
 
-// only 'renderAdminProducts', 'renderEditor', 'addProduct' incorporate dummy user
 module.exports = {
-  async renderAdminProducts(_, res) {
+  async renderAdminProducts(req, res) {
     try {
-      // const products = await Product.findAll();
-      const products = await req.user.getProducts();
-
+      const products = await Product.findAll({ vendorId: req.user._id });
       res.status(200).render('admin/products', {
         pageTitle: 'Admin Products',
         path: '/admin/products',
@@ -29,9 +25,7 @@ module.exports = {
     const editing = req.query.edit === 'true';
     const { id } = req.params;
     try {
-      // const product = await Product.findByPk(+id);
-      const [product] = await req.user.getProducts({ where: { id: +id } });
-
+      const product = await Product.findById(id);
       res.status(200).render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
@@ -44,26 +38,17 @@ module.exports = {
     }
   },
   async addProduct(req, res) {
+    const { title, price, description, imgURL } = req.body;
+    const product = new Product(
+      title,
+      +price,
+      description,
+      imgURL,
+      null, // no productId —> new product
+      req.user._id
+    );
     try {
-      const { title, imgURL, description, price } = req.body;
-
-      /*
-      await Product.create({
-        title,
-        imgURL,
-        description,
-        price: +price,
-        userId: req.user.id
-      });
-      */
-
-      // ASSOC-SPECIFIC METHODS
-      await req.user.createProduct({
-        title,
-        imgURL,
-        description,
-        price: +price
-      });
+      await product.save();
       res.status(201).redirect('/');
     } catch (err) {
       console.error(`Error adding product (${title}):`, err);
@@ -71,10 +56,17 @@ module.exports = {
     }
   },
   async editProduct(req, res) {
-    const { id, title, imgURL, description, price } = req.body;
+    const { title, price, description, imgURL, id } = req.body;
+    const product = new Product(
+      title,
+      +price,
+      description,
+      imgURL,
+      id, // productId —> existing product
+      req.user._id
+    );
     try {
-      const product = await Product.findByPk(+id);
-      await product.update({ title, imgURL, description, price: +price });
+      await product.save();
       res.status(302).redirect('/admin/products');
     } catch (err) {
       console.error(`Error editing product (${title}):`, err);
@@ -82,12 +74,12 @@ module.exports = {
     }
   },
   async deleteProduct(req, res) {
-    const { id, price } = req.body;
+    const { id } = req.body;
     try {
-      const product = await Product.findByPk(+id);
-      await product.destroy();
+      const product = await Product.findById(id);
 
-      // TODO: implement Cart.deleteProduct **
+      await Product.deleteById(id); // delete product from collection
+      await req.user.removeFromUserCart(product); // remove product from cart
 
       res.status(302).redirect('/admin/products');
     } catch (err) {

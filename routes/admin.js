@@ -14,8 +14,6 @@ router.get('/add-product', renderAdder);
 router.get('/edit-product/:id', renderEditor);
 
 router.post('/add-product', addProduct);
-
-// NOTE: HTML forms only natively support GET & POST methods **
 router.post('/edit-product', editProduct);
 router.post('/delete-product', deleteProduct);
 
