@@ -12,19 +12,17 @@ const cartItemSchema = new Schema(
       required: true
     }
   },
-  { _id: false } // ensures no distinct '_id' field for nested entity
+  { _id: false }
 );
 
 const cartSchema = new Schema(
   {
     items: {
       type: [cartItemSchema],
-      default: [],
       required: true
     },
     totalPrice: {
       type: Number,
-      default: 0,
       required: true
     }
   },
@@ -40,16 +38,22 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
-  cart: cartSchema
+  cart: {
+    type: cartSchema,
+    default: {
+      items: [],
+      totalPrice: 0
+    },
+    required: true
+  }
 });
 
-// methods defined on schema —> available to model instances **
 userSchema.methods.addToUserCart = async function ({ id, price }) {
   try {
     const cartItems = this.cart.items;
 
-    const productIndex = cartItems.findIndex(
-      ({ product }) => product.equals(id) // NOTE: each 'product' field == ObjectId
+    const productIndex = cartItems.findIndex(({ product }) =>
+      product.equals(id)
     );
     if (productIndex >= 0) {
       cartItems[productIndex].quantity++;

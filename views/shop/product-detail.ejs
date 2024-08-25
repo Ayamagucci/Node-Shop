@@ -3,7 +3,7 @@
 
   <body>
     <%- include('../includes/nav.ejs') %>
-    <main class="centered">
+    <main class="text-centered">
       <h1><%= product.title %></h1>
       <hr />
       <div>
@@ -11,5 +11,6 @@
       </div>
       <h2>$<%= product.price %></h2>
       <p><%= product.description %></p>
-      <%- include('../includes/add-to-cart.ejs') %>
+      <%- loggedIn && include('../includes/add-to-cart.ejs') %>
+      <a class="btn" href="/">Go Back</a>
 <%- include('../includes/end.ejs') %>

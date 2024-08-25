@@ -1,0 +1,25 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css" />
+  </head>
+
+  <body>
+    <%- include('../includes/nav.ejs') %>
+    <main>
+      <div class="centered">
+        <h1>User Login</h1>
+      </div>
+      <form id="login-form" class="product-form" action="/login" method="POST">
+        <div class="form-control">
+          <label for="login-email">Email</label>
+          <input type="email" name="email" id="login-email" />
+        </div>
+        <div class="form-control">
+          <label for="login-password">Password</label>
+          <input type="password" name="password" id="login-password" />
+        </div>
+        <div class="centered">
+          <button class="btn" type="submit">Login</button>
+          <a class="btn" href="/register">Register</a>
+        </div>
+      </form>
+<%- include('../includes/end.ejs') %>

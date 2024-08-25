@@ -1,15 +1,23 @@
 .orders__item {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 0.5rem;
+  margin: 1.5rem auto;
+  max-width: 600px;
 }
 
-.orders__title {
-  padding-bottom: 1rem;
+.orders__title,
+.orders__total {
+  margin: 0.5rem 0;
+  padding: 1rem 0;
+}
+
+.orders__total {
+  text-align: center;
 }
 
 .orders__products {
   list-style: none;
+  text-align: center;
   margin: 0;
   padding: 0;
 }
@@ -19,8 +27,4 @@
   padding: 0.5rem;
   border: 1px solid #00695c;
   color: #00695c;
-}
-
-.orders__total {
-  margin-top: 1.5rem;
 }

@@ -2,25 +2,13 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 
 module.exports = {
-  async renderIndex(_, res) {
-    try {
-      const products = await Product.find({});
-      res.status(200).render('shop/index', {
-        pageTitle: 'Shop',
-        path: '/',
-        products
-      });
-    } catch (err) {
-      console.error('Error rendering Index:', err);
-      return next(err);
-    }
-  },
-  async renderProducts(_, res) {
+  async renderProducts(req, res, next) {
     try {
       const products = await Product.find({});
       res.status(200).render('shop/product-list', {
         pageTitle: 'All Products',
-        path: '/products',
+        path: '/',
+        loggedIn: req.loggedIn,
         products
       });
     } catch (err) {
@@ -28,13 +16,14 @@ module.exports = {
       return next(err);
     }
   },
-  async renderDetails(req, res) {
+  async renderDetails(req, res, next) {
     const { id } = req.params;
     try {
       const product = await Product.findById(id);
       res.status(200).render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
+        loggedIn: req.loggedIn,
         product
       });
     } catch (err) {
@@ -42,19 +31,11 @@ module.exports = {
       return next(err);
     }
   },
-  async renderCart(req, res) {
+  async renderCart(req, res, next) {
     try {
-      const user = await req.user.populate({
-        // replaces 'ref' field w/ actual data from referenced doc **
-        path: 'cart.items.product',
-        select: 'title price description imgURL'
-      });
-
-      // console.log('user:', user);
-      // console.log('user.cart.items[0]:', user.cart.items[0]);
-
+      const user = await req.user.populate('cart.items.product');
       const products = user.cart.items.map(({ product, quantity }) => {
-        const { _id, title, price, imgURL, description } = product; // NOTE: actual data —> extracting '_id' (not 'id')!
+        const { _id, title, price, imgURL, description } = product;
         return {
           _id,
           title,
@@ -64,11 +45,10 @@ module.exports = {
           quantity
         };
       });
-      // console.log('products:', products);
-
       res.status(200).render('shop/cart', {
         pageTitle: 'Your Cart',
         path: '/cart',
+        loggedIn: req.loggedIn,
         totalPrice: req.user.cart.totalPrice,
         products
       });
@@ -77,36 +57,39 @@ module.exports = {
       return next(err);
     }
   },
-  async addToCart(req, res) {
+  async addToCart(req, res, next) {
     const { id } = req.body;
     try {
       const product = await Product.findById(id);
       await req.user.addToUserCart(product);
+
       res.status(201).redirect('/cart');
     } catch (err) {
       console.error('Error adding to Cart:', err);
       return next(err);
     }
   },
-  async removeFromCart(req, res) {
+  async removeFromCart(req, res, next) {
     const { id } = req.body;
     try {
       const product = await Product.findById(id);
       await req.user.removeFromUserCart(product);
+
       res.status(200).redirect('/cart');
     } catch (err) {
       console.error('Error removing item from Cart:', err);
       return next(err);
     }
   },
-  async renderOrders(req, res) {
+  async renderOrders(req, res, next) {
     try {
       const orders = await Order.find({ buyer: req.user.id }).populate(
-        'items.product' // each item in view —> product details
+        'items.product'
       );
       res.status(200).render('shop/orders', {
         pageTitle: 'Your Orders',
         path: '/orders',
+        loggedIn: req.loggedIn,
         orders
       });
     } catch (err) {
@@ -114,23 +97,21 @@ module.exports = {
       return next(err);
     }
   },
-  async postOrder(req, res) {
-    const { cart } = req.user;
-
+  async postOrder(req, res, next) {
+    const { id, cart } = req.user;
     const order = new Order({
-      buyer: req.user.id,
+      buyer: id,
       items: cart.items,
       totalPrice: cart.totalPrice
     });
     try {
-      await order.save(); // save new order
+      await order.save();
 
-      // reset cart
       req.user.cart = {
         items: [],
         totalPrice: 0
       };
-      await req.user.save(); // save user (cart)
+      await req.user.save();
 
       res.status(201).redirect('/orders');
     } catch (err) {
@@ -138,10 +119,11 @@ module.exports = {
       return next(err);
     }
   },
-  renderCheckout(_, res) {
+  renderCheckout(req, res) {
     res.status(200).render('shop/checkout', {
       pageTitle: 'Checkout',
-      path: '/checkout'
+      path: '/checkout',
+      loggedIn: req.loggedIn
     });
   }
 };

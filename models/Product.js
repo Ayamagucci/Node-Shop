@@ -18,15 +18,10 @@ const productSchema = new Schema({
     required: true
   },
   vendor: {
-    type: Schema.Types.ObjectId, // NOTE: instantiation —> Mongoose.Types.ObjectId
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
   }
 });
 
-/* NOTES:
-  • MongoDB itself == schema-less
-  • validation does not occur until saving
-   (i.e. instance in memory not validated)
-*/
 module.exports = model('Product', productSchema);

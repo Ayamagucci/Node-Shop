@@ -6,7 +6,7 @@
     <%- include('../includes/nav.ejs') %>
     <main>
       <% if (products.length > 0) { %>
-        <div class="centered">
+        <div class="text-centered">
           <h1>$<%= totalPrice.toFixed(2) %></h1>
           <form action="/orders" method="POST">
             <button class="btn" type="submit">Checkout</button>

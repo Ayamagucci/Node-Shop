@@ -4,5 +4,9 @@
   <body>
     <%- include('includes/nav.ejs') %>
     <main>
-      <h1>Page Not Found!</h1>
+      <h1><%= pageTitle %></h1>
+      <p><%= message %></p>
+      <% if (stack) { %>
+        <pre><%= stack %></pre>
+      <% } %>
 <%- include('includes/end.ejs') %>

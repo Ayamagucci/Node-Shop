@@ -10,7 +10,7 @@
         <p class="centered">No orders yet!</p>
       <% } else { %>
         <% orders.forEach(({ _id, items, totalPrice }) => { %>
-          <div class="orders__item">
+          <div class="orders__item centered">
             <div class="card__content">
               <h2 class="orders__title">OrderID: <%= _id %></h2>
               <ul class="orders__products">
@@ -23,7 +23,6 @@
               <h3 class="orders__total">Total: $<%= totalPrice.toFixed(2) %></h3>
             </div>
           </div>
-          <br />
         <% }) %>
       <% } %>
 <%- include('../includes/end.ejs') %>

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  renderIndex,
+  // renderIndex,
   renderProducts,
   renderDetails,
   renderCart,
@@ -12,7 +12,8 @@ const {
   renderCheckout
 } = require('../controllers/shop');
 
-router.get('/', renderIndex);
+// router.get('/', renderIndex);
+router.get('/', renderProducts);
 router.get('/products', renderProducts);
 router.get('/products/:id', renderDetails);
 router.get('/cart', renderCart);

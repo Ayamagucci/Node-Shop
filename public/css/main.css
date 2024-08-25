@@ -20,7 +20,19 @@ form {
 }
 
 .centered {
-  text-align: center;
+  /* text-align: center; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.image {
+  height: 20rem;
+}
+
+.image img {
+  height: 100%;
 }
 
 .main-header {
@@ -34,8 +46,10 @@ form {
 
 .main-header__nav {
   height: 100%;
-  display: none;
+  width: 100%;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .main-header__item-list {
@@ -50,14 +64,21 @@ form {
   padding: 0;
 }
 
-.main-header__item a {
+.main-header__item a,
+.main-header__item button {
+  font: inherit;
+  background: transparent;
+  border: none;
   text-decoration: none;
   color: white;
+  cursor: pointer;
 }
 
 .main-header__item a:hover,
 .main-header__item a:active,
-.main-header__item a.active {
+.main-header__item a.active,
+.main-header__item button:hover,
+.main-header__item button:active {
   color: #ffeb3b;
 }
 
@@ -141,8 +162,9 @@ form {
 .grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: center;
   align-items: stretch;
+  gap: 5rem;
 }
 
 .card {
@@ -195,6 +217,35 @@ form {
 .btn:active {
   background-color: #00695c;
   color: white;
+}
+
+.btn.danger {
+  color: red;
+  border-color: red;
+}
+
+.btn.danger:hover,
+.btn.danger:active {
+  background: red;
+  color: white;
+}
+
+.text-centered {
+  text-align: center;
+}
+
+.text-centered h1 {
+  margin-bottom: 10px;
+}
+
+.text-centered form {
+  margin: 0 auto;
+}
+
+.text-centered div {
+  margin-top: 2rem;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 @media (min-width: 768px) {
