@@ -9,6 +9,7 @@
         <div class="text-centered">
           <h1>$<%= totalPrice.toFixed(2) %></h1>
           <form action="/orders" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
             <button class="btn" type="submit">Checkout</button>
           </form>
         </div>
@@ -30,11 +31,14 @@
                   <%= description %>
                 </p>
               </div>
+
               <div class="card__actions">
                 <a href="/products/<%= _id %>" class="btn">Details</a>
+
                 <form action="/cart/remove" method="POST">
-                  <button class="btn" type="submit">Remove</button>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
                   <input type="hidden" name="id" value="<%= _id %>" />
+                  <button class="btn" type="submit">Remove</button>
                 </form>
               </div>
             </article>

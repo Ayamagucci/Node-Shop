@@ -1,12 +1,9 @@
 <header class="main-header">
   <nav class="main-header__nav">
     <ul class="main-header__item-list">
-      <!-- <li class="main-header__item">
-        <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
-      </li> -->
       <li class="main-header__item">
         <a class="<%= path === '/products' ? 'active' : '' %>" href="/products"
-          >Products</a
+          >All Products</a
         >
       </li>
       <% if (loggedIn) { %>
@@ -34,22 +31,19 @@
       </li>
       <% } %>
     </ul>
-    <% if (!loggedIn) { %>
     <ul class="main-header__item-list">
       <li class="main-header__item">
+        <% if (!loggedIn) { %>
         <a class="<%= path === '/login' ? 'active' : '' %>" href="/login"
           >Login</a
         >
+        <% } else { %>
+        <form action="/logout" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button type="submit">Logout</button>
+        </form>
+        <% } %>
       </li>
     </ul>
-    <% } else { %>
-    <ul class="main-header__item-list">
-      <li class="main-header__item">
-        <a class="<%= path === '/logout' ? 'active' : '' %>" href="/logout"
-          >Logout</a
-        >
-      </li>
-    </ul>
-    <% } %>
   </nav>
 </header>

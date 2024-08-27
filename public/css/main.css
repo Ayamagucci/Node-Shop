@@ -248,6 +248,20 @@ form {
   padding-bottom: 0;
 }
 
+.login-message {
+  margin: auto;
+  width: 30%;
+  border: 1px solid #4771fa;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  background: #b9c9ff;
+}
+
+.login-message--error {
+  border-color: red;
+  background: rgb(255, 176, 176);
+}
+
 @media (min-width: 768px) {
   .main-header__nav {
     display: flex;
@@ -255,5 +269,9 @@ form {
 
   #side-menu-toggle {
     display: none;
+  }
+
+  .user-message {
+    width: 30rem;
   }
 }

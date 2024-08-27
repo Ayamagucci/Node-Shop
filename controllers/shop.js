@@ -8,7 +8,6 @@ module.exports = {
       res.status(200).render('shop/product-list', {
         pageTitle: 'All Products',
         path: '/',
-        loggedIn: req.loggedIn,
         products
       });
     } catch (err) {
@@ -23,7 +22,6 @@ module.exports = {
       res.status(200).render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
-        loggedIn: req.loggedIn,
         product
       });
     } catch (err) {
@@ -48,7 +46,6 @@ module.exports = {
       res.status(200).render('shop/cart', {
         pageTitle: 'Your Cart',
         path: '/cart',
-        loggedIn: req.loggedIn,
         totalPrice: req.user.cart.totalPrice,
         products
       });
@@ -89,7 +86,6 @@ module.exports = {
       res.status(200).render('shop/orders', {
         pageTitle: 'Your Orders',
         path: '/orders',
-        loggedIn: req.loggedIn,
         orders
       });
     } catch (err) {
@@ -122,8 +118,7 @@ module.exports = {
   renderCheckout(req, res) {
     res.status(200).render('shop/checkout', {
       pageTitle: 'Checkout',
-      path: '/checkout',
-      loggedIn: req.loggedIn
+      path: '/checkout'
     });
   }
 };

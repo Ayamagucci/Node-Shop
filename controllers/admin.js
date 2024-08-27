@@ -8,7 +8,6 @@ module.exports = {
       res.status(200).render('admin/products', {
         pageTitle: 'Admin Products',
         path: '/admin/products',
-        loggedIn: req.loggedIn,
         products
       });
     } catch (err) {
@@ -20,7 +19,6 @@ module.exports = {
     res.status(200).render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
-      loggedIn: req.loggedIn,
       editing: false
     });
   },
@@ -32,7 +30,6 @@ module.exports = {
       res.status(200).render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
-        loggedIn: req.loggedIn,
         editing,
         product
       });

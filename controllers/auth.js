@@ -1,72 +1,78 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const extractFlashMsgs = require('../util/extractFlashMsg');
 
 module.exports = {
   renderLogin(req, res) {
+    // console.log('req.flash("error"):', req.flash('error')); // NOTE: 'flash' msgs stored in arrays —> handle accordingly in views **
+
+    const msg = extractFlashMsgs(req, 'error');
+
     res.status(200).render('auth/login', {
       pageTitle: 'User Login',
       path: '/login',
-      loggedIn: req.loggedIn
+      msg
     });
+    /* all 'flash' msgs transient **
+      (cleared from session following completion of subsequent req)
+    */
   },
   async loginUser(req, res, next) {
-    const { email, password } = req.body; // NOTE: will handle password after learning authentication
+    const { email, password } = req.body;
     try {
       const user = await User.findOne({ email });
-      if (!user) {
-        throw `User not found w/ email: ${email}`;
+
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        req.flash('error', 'Invalid email or password!'); // adds 'flash' msg at given key for current session
+        return res.status(401).redirect('/login'); // NOTE: redirects —> (2) distinct reqs for brief period **
       }
 
-      // cookies —> CLIENT-SIDE data storage **
-      // res.cookie('user', JSON.stringify(user)); // https://expressjs.com/en/api.html#res.cookie
-      // console.log('req.headers.cookie:', req.headers.cookie);
-
-      /* NOTE: cookies have expiration dates
-        • session cookies by default **
-        • can pass options arg
-         (e.g. 'maxAge' or 'expires' —> duration in ms)
-      */
-
-      /* sessions —> SERVER-SIDE data storage **
-        (NOTE: cookie still used to assoc. session w/ given user/client!)
-      */
       req.session.userId = user._id;
-      // console.log('req.session:', req.session);
-
-      // BONUS: prevents redirect from occurring before new session saved **
       await req.session.save();
 
-      res.status(200).redirect('/');
+      res.status(302).redirect('/');
     } catch (err) {
       console.error('Error logging in User:', err);
       return next(err);
     }
   },
   logoutUser(req, res, next) {
-    // res.clearCookie('user'); // https://expressjs.com/en/api.html#res.clearCookie
     req.session.destroy((err) => {
       if (err) {
         console.error('Failed to destroy session:', err);
         return next(err);
       }
-      res.status(200).redirect('/');
+      res.status(302).redirect('/');
     });
   },
   renderRegister(req, res) {
+    const msg = extractFlashMsgs(req, 'error');
+
     res.status(200).render('auth/register', {
       pageTitle: 'User Registration',
       path: '/register',
-      loggedIn: req.loggedIn
+      msg
     });
   },
   async registerUser(req, res, next) {
-    const { name, email, password } = req.body;
+    const { name, email, password, confirmPassword } = req.body;
     try {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        throw `User already exists w/ email: ${email}`;
+        req.flash('error', 'User already exists with that email!');
+        return res.status(400).redirect('/register');
       }
 
-      const newUser = new User({ name, email }); // default vals (cart schema) —> no need to explicitly pass empty cart **
+      if (password !== confirmPassword) {
+        req.flash('error', 'Passwords do not match!');
+        return res.status(400).redirect('/register');
+      }
+
+      const newUser = new User({
+        name,
+        email,
+        password: await bcrypt.hash(password, 12) // NOTE: standard "salt" val (i.e. rounds of hashing)
+      });
       await newUser.save();
 
       req.session.userId = newUser._id;

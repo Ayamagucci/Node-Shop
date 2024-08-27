@@ -5,24 +5,32 @@
   <body>
     <%- include('../includes/nav.ejs') %>
     <main>
-      <div class="centered">
+      <div class="text-centered">
         <h1>User Registration</h1>
+
+        <% if (msg) { %>
+          <p class="login-message login-message--error"><%= msg %></p>
+        <% } %>
       </div>
       <form id="register-form" class="product-form" action="/register" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
         <div class="form-control">
           <label for="register-name">Name</label>
           <input type="text" name="name" id="register-name" />
-        </div>
-        <div class="form-control">
+
           <label for="register-email">Email</label>
           <input type="email" name="email" id="register-email" />
-        </div>
-        <div class="form-control">
+
           <label for="register-password">Password</label>
           <input type="password" name="password" id="register-password" />
+
+          <label for="register-confirm-password">Confirm Password</label>
+          <input type="password" name="confirmPassword" id="register-confirm-password" />
         </div>
+
         <div class="centered">
-          <button class="btn" type="submit">Save</button>
+          <button class="btn" type="submit">Sign Up</button>
         </div>
       </form>
 <%- include('../includes/end.ejs') %>
