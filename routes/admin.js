@@ -8,11 +8,8 @@ const {
   editProduct,
   deleteProduct
 } = require('../controllers/admin');
-
-// ROUTE PROTECTION
 const isAuth = require('../util/isAuth');
 
-// parsed from left to right **
 router.get('/products', isAuth, renderAdminProducts);
 router.get('/add-product', isAuth, renderAdder);
 router.get('/edit-product/:id', isAuth, renderEditor);

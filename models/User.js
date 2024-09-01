@@ -52,6 +52,12 @@ const userSchema = new Schema({
   }
 });
 
+userSchema.methods.calculateTotalPrice = function () {
+  return this.cart.items.reduce((total, { product, quantity }) => {
+    return total + product.price * quantity;
+  }, 0);
+};
+
 userSchema.methods.addToUserCart = async function ({ id, price }) {
   try {
     const cartItems = this.cart.items;
@@ -64,9 +70,11 @@ userSchema.methods.addToUserCart = async function ({ id, price }) {
     } else {
       cartItems.push({ product: id, quantity: 1 });
     }
-    this.cart.totalPrice += price;
 
-    await this.save();
+    await this.populate('cart.items.product');
+    this.cart.totalPrice = this.calculateTotalPrice();
+
+    await this.save(); // NOTE: populated fields revert to ObjectId refs on req completion **
   } catch (err) {
     throw err;
   }
@@ -75,9 +83,10 @@ userSchema.methods.addToUserCart = async function ({ id, price }) {
 userSchema.methods.removeFromUserCart = async function ({ id, price }) {
   try {
     const cartItems = this.cart.items;
-
     this.cart.items = cartItems.filter(({ product }) => !product.equals(id));
-    this.cart.totalPrice -= price;
+
+    await this.populate('cart.items.product');
+    this.cart.totalPrice = this.calculateTotalPrice();
 
     await this.save();
   } catch (err) {
