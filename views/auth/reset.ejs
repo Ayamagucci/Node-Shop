@@ -6,27 +6,25 @@
     <%- include('../includes/nav.ejs') %>
     <main>
       <div class="text-centered">
-        <h1>User Login</h1>
+        <h1>Password Reset</h1>
 
-        <% if (msg) { %>
-        <p class="login-message login-message--error"><%= msg %></p>
+        <% if (errorMsg) { %>
+        <p class="login-message login-message--error"><%= errorMsg %></p>
+        <% } %>
+        <% if (successMsg) { %>
+        <p class="login-message login-message--success"><%= successMsg %></p>
         <% } %>
       </div>
-      <form id="login-form" class="product-form" action="/login" method="POST">
+      <form id="login-form" class="product-form" action="/reset" method="POST">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
         <div class="form-control">
           <label for="login-email">Email</label>
           <input type="email" name="email" id="login-email" />
-
-          <label for="login-password">Password</label>
-          <input type="password" name="password" id="login-password" />
         </div>
 
         <div class="centered">
-          <button class="btn" type="submit">Login</button>
-          <a class="btn" href="/register">Register</a>
-          <a href="/reset">Reset Password</a>
+          <button class="btn" type="submit">Reset</button>
         </div>
       </form>
 <%- include('../includes/end.ejs') %>

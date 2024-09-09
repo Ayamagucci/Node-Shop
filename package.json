@@ -1,5 +1,5 @@
 {
-  "name": "14-emails",
+  "name": "15-auth-advanced",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js"

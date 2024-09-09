@@ -49,44 +49,48 @@ const userSchema = new Schema({
       totalPrice: 0
     },
     required: true
-  }
+  },
+  resetToken: String,
+  resetTokenExpiry: Date
 });
 
-userSchema.methods.calculateTotalPrice = function () {
+userSchema.methods.calculateTotalPrice = async function () {
+  try {
+    await this.populate('cart.items.product');
+  } catch (err) {
+    throw err;
+  }
   return this.cart.items.reduce((total, { product, quantity }) => {
     return total + product.price * quantity;
   }, 0);
 };
 
-userSchema.methods.addToUserCart = async function ({ id, price }) {
+userSchema.methods.addToUserCart = async function ({ _id, price }) {
   try {
     const cartItems = this.cart.items;
 
     const productIndex = cartItems.findIndex(({ product }) =>
-      product.equals(id)
+      product.equals(_id)
     );
     if (productIndex >= 0) {
       cartItems[productIndex].quantity++;
     } else {
-      cartItems.push({ product: id, quantity: 1 });
+      cartItems.push({ product: _id, quantity: 1 });
     }
+    this.cart.totalPrice = await this.calculateTotalPrice();
 
-    await this.populate('cart.items.product');
-    this.cart.totalPrice = this.calculateTotalPrice();
-
-    await this.save(); // NOTE: populated fields revert to ObjectId refs on req completion **
+    await this.save();
   } catch (err) {
     throw err;
   }
 };
 
-userSchema.methods.removeFromUserCart = async function ({ id, price }) {
+userSchema.methods.removeFromUserCart = async function ({ _id, price }) {
   try {
     const cartItems = this.cart.items;
-    this.cart.items = cartItems.filter(({ product }) => !product.equals(id));
 
-    await this.populate('cart.items.product');
-    this.cart.totalPrice = this.calculateTotalPrice();
+    this.cart.items = cartItems.filter(({ product }) => !product.equals(_id));
+    this.cart.totalPrice = await this.calculateTotalPrice();
 
     await this.save();
   } catch (err) {

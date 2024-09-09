@@ -6,46 +6,43 @@
     <%- include('../includes/nav.ejs') %>
     <main>
       <% if (products.length > 0) { %>
-        <div class="text-centered">
-          <h1>$<%= totalPrice.toFixed(2) %></h1>
-          <form action="/orders" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-            <button class="btn" type="submit">Checkout</button>
-          </form>
-        </div>
-        <div class="grid">
-          <% for (const { title, price, description, imgURL, _id, quantity } of products) { %>
-            <article class="card product-item">
-              <header class="card__header">
-                <h1 class="product__title"><%= title %> (<%= quantity %>)</h1>
-              </header>
-              <div class="card__image">
-                <img
-                  src="<%= imgURL %>"
-                  alt="<%= title %>"
-                />
-              </div>
-              <div class="card__content">
-                <h2 class="product__price">$<%= price * quantity %></h2>
-                <p class="product__description">
-                  <%= description %>
-                </p>
-              </div>
+      <div class="text-centered">
+        <h1>$<%= totalPrice.toFixed(2) %></h1>
+        <form action="/orders" method="POST">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <button class="btn" type="submit">Checkout</button>
+        </form>
+      </div>
+      <div class="grid">
+        <% for (const { title, price, description, imgURL, _id, quantity } of products) { %>
+        <article class="card product-item">
+          <header class="card__header">
+            <h1 class="product__title"><%= title %> (<%= quantity %>)</h1>
+          </header>
 
-              <div class="card__actions">
-                <a href="/products/<%= _id %>" class="btn">Details</a>
+          <div class="card__image">
+            <img src="<%= imgURL %>" alt="<%= title %>" />
+          </div>
 
-                <form action="/cart/remove" method="POST">
-                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                  <input type="hidden" name="id" value="<%= _id %>" />
-                  <button class="btn" type="submit">Remove</button>
-                </form>
-              </div>
-            </article>
-          <% } %>
-        </div>
+          <div class="card__content">
+            <h2 class="product__price">$<%= price * quantity %></h2>
+            <p class="product__description"><%= description %></p>
+          </div>
+
+          <div class="card__actions">
+            <a href="/products/<%= _id %>" class="btn">Details</a>
+
+            <form action="/cart/remove" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="id" value="<%= _id %>" />
+              <button class="btn" type="submit">Remove</button>
+            </form>
+          </div>
+        </article>
+        <% } %>
+      </div>
       <% } else { %>
-        <h1>No Products in Cart!</h1>
-        <a href="/products" class="btn">Add Some</a>
+      <h1>No Products in Cart!</h1>
+      <a href="/products" class="btn">Add Some</a>
       <% } %>
 <%- include('../includes/end.ejs') %>

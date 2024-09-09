@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongoose').Types;
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 
@@ -12,13 +13,13 @@ module.exports = {
       });
     } catch (err) {
       console.error('Error rendering Products:', err);
-      return next(err);
+      next(err);
     }
   },
   async renderDetails(req, res, next) {
     const { id } = req.params;
     try {
-      const product = await Product.findById(id);
+      const product = await Product.findById(new ObjectId(id));
       res.status(200).render('shop/product-detail', {
         pageTitle: product.title,
         path: '/products',
@@ -26,7 +27,7 @@ module.exports = {
       });
     } catch (err) {
       console.error('Error rendering Product Details:', err);
-      return next(err);
+      next(err);
     }
   },
   async renderCart(req, res, next) {
@@ -51,36 +52,36 @@ module.exports = {
       });
     } catch (err) {
       console.error('Failed to fetch product data for Cart:', err);
-      return next(err);
+      next(err);
     }
   },
   async addToCart(req, res, next) {
     const { id } = req.body;
     try {
-      const product = await Product.findById(id);
+      const product = await Product.findById(new ObjectId(id));
       await req.user.addToUserCart(product);
 
       res.status(201).redirect('/cart');
     } catch (err) {
       console.error('Error adding to Cart:', err);
-      return next(err);
+      next(err);
     }
   },
   async removeFromCart(req, res, next) {
     const { id } = req.body;
     try {
-      const product = await Product.findById(id);
+      const product = await Product.findById(new ObjectId(id));
       await req.user.removeFromUserCart(product);
 
       res.status(200).redirect('/cart');
     } catch (err) {
       console.error('Error removing item from Cart:', err);
-      return next(err);
+      next(err);
     }
   },
   async renderOrders(req, res, next) {
     try {
-      const orders = await Order.find({ buyer: req.user.id }).populate(
+      const orders = await Order.find({ buyer: req.user._id }).populate(
         'items.product'
       );
       res.status(200).render('shop/orders', {
@@ -90,13 +91,13 @@ module.exports = {
       });
     } catch (err) {
       console.error('Error rendering Orders:', err);
-      return next(err);
+      next(err);
     }
   },
   async postOrder(req, res, next) {
     const { id, cart } = req.user;
     const order = new Order({
-      buyer: id,
+      buyer: new ObjectId(id),
       items: cart.items,
       totalPrice: cart.totalPrice
     });
@@ -112,7 +113,7 @@ module.exports = {
       res.status(201).redirect('/orders');
     } catch (err) {
       console.error('Error posting Order:', err);
-      return next(err);
+      next(err);
     }
   },
   renderCheckout(req, res) {

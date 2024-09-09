@@ -262,6 +262,11 @@ form {
   background: rgb(255, 176, 176);
 }
 
+.login-message--success {
+  border-color: green;
+  background: rgb(186, 255, 179);
+}
+
 @media (min-width: 768px) {
   .main-header__nav {
     display: flex;
