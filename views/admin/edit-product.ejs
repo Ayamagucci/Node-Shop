@@ -6,27 +6,51 @@
   <body>
     <%- include('../includes/nav.ejs') %>
     <main>
+      <%- include('../includes/flashMsgs.ejs') %>
+
       <form class="product-form" action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
         <% if (editing) { %>
-        <input type="hidden" name="id" value="<%= product._id %>" />
+        <input type="hidden" name="productId" value="<%= productId %>" />
         <% } %>
 
         <div class="form-control">
           <label for="title">Title</label>
-          <input type="text" name="title" id="title" value="<%= editing ? product.title : '' %>" />
+          <input
+            type="text"
+            name="title"
+            id="title"
+            value="<%= userInputs.title %>"
+            class="<%= validationErrors.find((err) => err.path === 'title') ? 'invalid' : '' %>"
+          />
 
           <label for="imgURL">Image URL</label>
-          <input type="text" name="imgURL" id="imgURL" value="<%= editing ? product.imgURL : '' %>"
+          <input
+            type="text"
+            name="imgURL"
+            id="imgURL"
+            value="<%= userInputs.imgURL %>"
+            class="<%= validationErrors.find((err) => err.path === 'imgURL') ? 'invalid' : '' %>"
           />
 
           <label for="price">Price</label>
-          <input type="number" step="0.01" name="price" id="price" value="<%= editing ? product.price : '' %>"
+          <input
+            type="number"
+            name="price"
+            id="price"
+            step="0.01"
+            value="<%= userInputs.price %>"
+            class="<%= validationErrors.find((err) => err.path === 'price') ? 'invalid' : '' %>"
           />
 
           <label for="description">Description</label>
-          <textarea name="description" id="description" rows="5"><%= editing ? product.description : '' %></textarea>
+          <textarea
+            name="description"
+            id="description"
+            rows="5"
+            class="<%= validationErrors.find((err) => err.path === 'description') ? 'invalid' : '' %>"
+          ><%= userInputs.description %></textarea>
         </div>
 
         <button class="btn" type="submit">

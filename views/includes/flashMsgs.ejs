@@ -1,0 +1,8 @@
+<div class="text-centered">
+  <% if (validationErrors.length > 0) { %> <% validationErrors.forEach((err) =>
+  { %>
+  <p class="login-message login-message--error"><%= err.msg %></p>
+  <% }) } %> <% if (successMsg) { %>
+  <p class="login-message login-message--success"><%= successMsg %></p>
+  <% } %>
+</div>

@@ -7,20 +7,18 @@
     <main>
       <div class="text-centered">
         <h1>User Login</h1>
-
-        <% if (msg) { %>
-        <p class="login-message login-message--error"><%= msg %></p>
-        <% } %>
+        <%- include('../includes/flashMsgs.ejs') %>
       </div>
-      <form id="login-form" class="product-form" action="/login" method="POST">
+
+      <form id="login-form" class="product-form" action="/login" method="POST" novalidate>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
         <div class="form-control">
           <label for="login-email">Email</label>
-          <input type="email" name="email" id="login-email" />
+          <input type="email" name="email" id="login-email" value="<%= userInputs.email %>" />
 
           <label for="login-password">Password</label>
-          <input type="password" name="password" id="login-password" />
+          <input type="password" name="password" id="login-password" value="<%= userInputs.password %>" />
         </div>
 
         <div class="centered">

@@ -5,6 +5,8 @@
   <body>
     <%- include('../includes/nav.ejs') %>
     <main>
+      <%- include('../includes/flashMsgs.ejs') %>
+
       <% if (products.length > 0) { %>
       <div class="grid">
         <% for (const { title, imgURL, price, description, _id } of products) { %>
@@ -25,7 +27,7 @@
 
             <form action="/admin/delete-product" method="POST">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <input type="hidden" name="id" value="<%= _id %>" />
+              <input type="hidden" name="productId" value="<%= _id %>" />
               <input type="hidden" name="price" value="<%= price %>" />
               <button class="btn" type="submit">Delete</button>
             </form>

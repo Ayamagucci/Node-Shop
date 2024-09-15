@@ -1,13 +1,12 @@
 require('dotenv').config();
 const { MAILTRAP_HOST, MAILTRAP_PORT, MAILTRAP_USER, MAILTRAP_PW } =
   process.env;
-const User = require('../models/User');
 const { createTransport } = require('nodemailer');
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const getFlashMsg = require('../util/getFlashMsg');
-const findUserByToken = require('../util/findUserByToken');
-const { ObjectId } = require('mongodb');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+const { validationResult } = require('express-validator');
+const getFlashMsgs = require('../util/getFlashMsgs');
 
 const transporter = createTransport({
   host: MAILTRAP_HOST,
@@ -20,26 +19,34 @@ const transporter = createTransport({
 
 module.exports = {
   renderLogin(req, res) {
-    const msg = getFlashMsg(req, 'error');
     res.status(200).render('auth/login', {
       pageTitle: 'User Login',
       path: '/login',
-      msg
+      userInputs: { email: '', password: '' },
+      successMsg: getFlashMsgs(req, 'success')[0]?.msg,
+      validationErrors: getFlashMsgs(req, 'error')
     });
   },
   async loginUser(req, res, next) {
     const { email, password } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(401).render('auth/login', {
+        pageTitle: 'User Login',
+        path: '/login',
+        userInputs: { email, password },
+        successMsg: '',
+        validationErrors: errors.array()
+      });
+    }
     try {
       const user = await User.findOne({ email });
 
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        req.flash('error', 'Invalid email or password!');
-        return res.status(401).redirect('/login');
-      }
-
-      req.session.userId = user._id;
+      req.session.userId = req.user._id;
       await req.session.save();
 
+      req.flash('success', 'Logged in successfully!');
       res.status(302).redirect('/');
     } catch (err) {
       console.error('Error logging in User:', err);
@@ -56,27 +63,28 @@ module.exports = {
     });
   },
   renderRegister(req, res) {
-    const msg = getFlashMsg(req, 'error');
     res.status(200).render('auth/register', {
       pageTitle: 'User Registration',
       path: '/register',
-      msg
+      userInputs: { name: '', email: '', password: '', confirmPassword: '' },
+      successMsg: getFlashMsgs(req, 'success')[0]?.msg,
+      validationErrors: getFlashMsgs(req, 'error')
     });
   },
   async registerUser(req, res, next) {
     const { name, email, password, confirmPassword } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).render('auth/register', {
+        pageTitle: 'User Registration',
+        path: '/register',
+        userInputs: { name, email, password, confirmPassword },
+        successMsg: '',
+        validationErrors: errors.array()
+      });
+    }
     try {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        req.flash('error', 'User already exists with that email!');
-        return res.status(400).redirect('/register');
-      }
-
-      if (password !== confirmPassword) {
-        req.flash('error', 'Passwords do not match!');
-        return res.status(400).redirect('/register');
-      }
-
       const newUser = new User({
         name,
         email,
@@ -94,6 +102,7 @@ module.exports = {
         text: `Congratulations, ${name}! You've successfully signed up!`
       });
 
+      req.flash('success', 'Account successfully created!');
       res.status(201).redirect('/');
     } catch (err) {
       console.error('Error registering New User:', err);
@@ -101,43 +110,40 @@ module.exports = {
     }
   },
   renderReset(req, res) {
-    const errorMsg = getFlashMsg(req, 'error');
-    const successMsg = getFlashMsg(req, 'success');
-
     res.status(200).render('auth/reset', {
       pageTitle: 'Password Reset',
       path: '/reset',
-      errorMsg,
-      successMsg
+      userInput: '',
+      successMsg: getFlashMsgs(req, 'success')[0]?.msg,
+      validationErrors: getFlashMsgs(req, 'error')
     });
   },
   sendResetToken(req, res, next) {
     const { email } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(404).render('auth/reset', {
+        pageTitle: 'Password Reset',
+        path: '/reset',
+        userInput: email,
+        successMsg: '',
+        validationErrors: errors.array()
+      });
+    }
     crypto.randomBytes(32, (err, buffer) => {
-      /* NOTE: each byte —> 8 bits / 2 hexadecimal chars
-        • (bits): degree of randomness
-        • (hexadecimal chars): length of resulting buffer
-      */
       if (err) {
         console.error('Error generating Reset Token:', err);
         return next(err);
       }
-      const resetToken = buffer.toString('hex'); // hexadecimal vals —> ASCII chars
+      const resetToken = buffer.toString('hex');
 
       (async () => {
         try {
-          const user = await User.findOne({ email });
-          if (!user) {
-            req.flash('error', 'No account found with that email!');
-            return res.status(404).redirect('/reset');
-          }
+          req.user.resetToken = resetToken;
+          req.user.resetTokenExpiry = Date.now() + 1000 * 60 * 60;
+          await req.user.save();
 
-          // save user w/ reset token
-          user.resetToken = resetToken;
-          user.resetTokenExpiry = Date.now() + 1000 * 60 * 60; // expires after 1 hr
-          await user.save();
-
-          // send reset email
           await transporter.sendMail({
             to: email,
             from: 'admin@shop.com',
@@ -150,7 +156,7 @@ module.exports = {
 
           req.flash(
             'success',
-            'Please check your inbox (or spam folder) for a link to reset your password!'
+            'Please check your email for a link to reset your password!'
           );
           res.status(302).redirect('/reset');
         } catch (err) {
@@ -160,60 +166,65 @@ module.exports = {
       })();
     });
   },
-  async renderChangePassword(req, res, next) {
-    const errorMsg = getFlashMsg(req, 'error');
-    const successMsg = getFlashMsg(req, 'success');
-
+  renderChangePassword(req, res, next) {
     const { resetToken } = req.params;
-    try {
-      const user = await findUserByToken(resetToken);
-      if (!user) {
-        req.flash(
-          'error',
-          'Reset Token has expired or is invalid — please submit another reset request!'
-        );
-        return res.status(400).redirect('/reset');
-      }
 
-      res.status(200).render('auth/changePassword', {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).render('auth/reset', {
         pageTitle: 'Password Reset',
         path: '/reset',
-        errorMsg,
-        successMsg,
-        userId: user._id,
-        resetToken
+        userInput: '',
+        successMsg: '',
+        validationErrors: errors.array()
       });
-    } catch (err) {
-      console.error('Error finding User for Reset Token:', err);
-      next(err);
     }
+
+    res.status(200).render('auth/changePassword', {
+      pageTitle: 'Password Reset',
+      path: '/reset',
+      userId: req.user._id.toString(),
+      resetToken,
+      userInputs: { newPassword: '', confirmPassword: '' },
+      successMsg: getFlashMsgs(req, 'success')[0]?.msg,
+      validationErrors: getFlashMsgs(req, 'error')
+    });
   },
   async changePassword(req, res, next) {
     const { userId, newPassword, confirmPassword } = req.body;
     const { resetToken } = req.params;
-    try {
-      const user = await findUserByToken(resetToken, new ObjectId(userId));
-      if (!user) {
-        req.flash(
-          'error',
-          'Reset Token has expired or is invalid — please submit another reset request!'
-        );
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const { msg } = errors.array()[0];
+
+      if (
+        msg ===
+        'Reset Token has expired or is invalid — please submit another reset request!'
+      ) {
+        req.flash('error', msg);
         return res.status(400).redirect('/reset');
       }
 
-      if (newPassword !== confirmPassword) {
-        req.flash('error', 'Passwords do not match!');
-        return res.status(400).redirect(`/reset/${resetToken}`);
-      }
+      return res.status(400).render('auth/changePassword', {
+        pageTitle: 'Password Reset',
+        path: '/reset',
+        userId,
+        resetToken,
+        userInputs: { newPassword, confirmPassword },
+        successMsg: '',
+        validationErrors: errors.array()
+      });
+    }
+    try {
+      req.user.password = await bcrypt.hash(newPassword, 12);
+      req.user.resetToken = undefined;
+      req.user.resetTokenExpiry = undefined;
 
-      // set new password & clear token
-      user.password = await bcrypt.hash(newPassword, 12);
-      user.resetToken = undefined;
-      user.resetTokenExpiry = undefined;
-      await user.save();
+      await req.user.save();
 
       req.flash('success', 'Password successfully updated!');
-      res.status(302).redirect('/reset');
+      res.status(302).redirect('/login');
     } catch (err) {
       console.error('Error changing User Password:', err);
       next(err);

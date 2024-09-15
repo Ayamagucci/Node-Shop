@@ -1,7 +1,6 @@
 require('dotenv').config();
-const { MODE, SERVER_PORT, DB_NAME } = process.env;
+const { MODE, SERVER_PORT, DB_NAME, SESSION_SECRET } = process.env;
 require('./util/db');
-const { ObjectId } = require('mongoose').Types;
 const path = require('path');
 const express = require('express');
 const adminRoutes = require('./routes/admin');
@@ -27,10 +26,10 @@ const store = new MongoDBStore({
 
 app.use(
   session({
-    secret: 'my secret',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 24 hrs in ms
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
     store
   })
 );
@@ -41,7 +40,7 @@ app.use(async (req, _, next) => {
   const { userId } = req.session;
   if (userId) {
     try {
-      req.user = await User.findById(new ObjectId(userId));
+      req.user = await User.findById(userId);
     } catch (err) {
       console.error('Error fetching user data for session:', err);
       return next(err);

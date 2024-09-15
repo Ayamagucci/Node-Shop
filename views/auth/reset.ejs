@@ -7,20 +7,15 @@
     <main>
       <div class="text-centered">
         <h1>Password Reset</h1>
-
-        <% if (errorMsg) { %>
-        <p class="login-message login-message--error"><%= errorMsg %></p>
-        <% } %>
-        <% if (successMsg) { %>
-        <p class="login-message login-message--success"><%= successMsg %></p>
-        <% } %>
+        <%- include('../includes/flashMsgs.ejs') %>
       </div>
-      <form id="login-form" class="product-form" action="/reset" method="POST">
+
+      <form id="login-form" class="product-form" action="/reset" method="POST" novalidate>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
         <div class="form-control">
           <label for="login-email">Email</label>
-          <input type="email" name="email" id="login-email" />
+          <input type="email" name="email" id="login-email" value="<%= userInput %>" />
         </div>
 
         <div class="centered">

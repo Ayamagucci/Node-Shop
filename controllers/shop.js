@@ -1,6 +1,7 @@
 const { ObjectId } = require('mongoose').Types;
-const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Order = require('../models/Order');
+const getFlashMsgs = require('../util/getFlashMsgs');
 
 module.exports = {
   async renderProducts(req, res, next) {
@@ -9,7 +10,9 @@ module.exports = {
       res.status(200).render('shop/product-list', {
         pageTitle: 'All Products',
         path: '/',
-        products
+        products,
+        successMsg: getFlashMsgs(req, 'success')[0]?.msg,
+        validationErrors: getFlashMsgs(req, 'error')
       });
     } catch (err) {
       console.error('Error rendering Products:', err);

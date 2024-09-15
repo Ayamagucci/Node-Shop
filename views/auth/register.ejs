@@ -7,26 +7,48 @@
     <main>
       <div class="text-centered">
         <h1>User Registration</h1>
-
-        <% if (msg) { %>
-        <p class="login-message login-message--error"><%= msg %></p>
-        <% } %>
+        <%- include('../includes/flashMsgs.ejs') %>
       </div>
-      <form id="register-form" class="product-form" action="/register" method="POST">
+
+      <form id="register-form" class="product-form" action="/register" method="POST" novalidate>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
         <div class="form-control">
           <label for="register-name">Name</label>
-          <input type="text" name="name" id="register-name" />
+          <input
+            type="text"
+            name="name"
+            id="register-name"
+            value="<%= userInputs.name %>"
+            class="<%= validationErrors.find((err) => err.path === 'name') ? 'invalid' : '' %>"
+          />
 
           <label for="register-email">Email</label>
-          <input type="email" name="email" id="register-email" />
+          <input
+            type="email"
+            name="email"
+            id="register-email"
+            value="<%= userInputs.email %>"
+            class="<%= validationErrors.find((err) => err.path === 'email') ? 'invalid' : '' %>"
+          />
 
           <label for="register-password">Password</label>
-          <input type="password" name="password" id="register-password" />
+          <input
+            type="password"
+            name="password"
+            id="register-password"
+            value="<%= userInputs.password %>"
+            class="<%= validationErrors.find((err) => err.path === 'password') ? 'invalid' : '' %>"
+          />
 
           <label for="register-confirm-password">Confirm Password</label>
-          <input type="password" name="confirmPassword" id="register-confirm-password" />
+          <input
+            type="password"
+            name="confirmPassword"
+            id="register-confirm-password"
+            value="<%= userInputs.confirmPassword %>"
+            class="<%= validationErrors.find((err) => err.path === 'confirmPassword') ? 'invalid' : '' %>"
+          />
         </div>
 
         <div class="centered">

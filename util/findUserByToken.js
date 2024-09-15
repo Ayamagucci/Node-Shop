@@ -2,7 +2,6 @@ const User = require('../models/User');
 
 module.exports = async (resetToken, userId) => {
   try {
-    // build query obj dynamically **
     const query = {
       resetToken,
       resetTokenExpiry: { $gt: Date.now() }

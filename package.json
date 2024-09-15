@@ -1,5 +1,5 @@
 {
-  "name": "15-auth-advanced",
+  "name": "16-validation",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js"
@@ -13,6 +13,7 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "express-validator": "^7.2.0",
     "mongoose": "^8.5.3",
     "nodemailer": "^6.9.14"
   },

@@ -5,6 +5,8 @@
   <body>
     <%- include('../includes/nav.ejs') %>
     <main>
+      <%- include('../includes/flashMsgs.ejs') %>
+
       <% if (products.length > 0) { %>
       <div class="grid">
         <% for (const product of products) { %>
