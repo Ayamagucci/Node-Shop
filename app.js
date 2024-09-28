@@ -3,14 +3,14 @@ const { MODE, SERVER_PORT, DB_NAME, SESSION_SECRET } = process.env;
 require('./util/db');
 const path = require('path');
 const express = require('express');
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
-const authRoutes = require('./routes/auth');
-const User = require('./models/User');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csurf = require('csurf');
 const flash = require('connect-flash');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
+const User = require('./models/User');
 
 const app = express();
 
@@ -62,13 +62,13 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.use((err, req, res, _) => {
-  console.error('Error:', err);
+app.use(({ name, message, stack }, req, res, _) => {
+  console.error('SERVER ERROR:', err);
   res.status(500).render('error', {
-    pageTitle: err.name,
+    pageTitle: name,
     path: '',
-    message: err.message,
-    stack: MODE === 'development' ? err.stack : undefined
+    message,
+    stack: MODE === 'development' ? stack : undefined
   });
 });
 

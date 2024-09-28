@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const cartItemSchema = new Schema(
   {
@@ -36,7 +37,8 @@ const userSchema = new Schema({
   },
   email: {
     type: String,
-    required: true
+    required: true,
+    index: true // speeds up all related queries! **
   },
   password: {
     type: String,
@@ -50,8 +52,14 @@ const userSchema = new Schema({
     },
     required: true
   },
-  resetToken: String,
-  resetTokenExpiry: Date
+  resetToken: {
+    type: String,
+    default: undefined
+  },
+  resetTokenExpiry: {
+    type: Date,
+    default: undefined
+  }
 });
 
 userSchema.methods.calculateTotalPrice = async function () {
@@ -65,7 +73,7 @@ userSchema.methods.calculateTotalPrice = async function () {
   }, 0);
 };
 
-userSchema.methods.addToUserCart = async function ({ _id, price }) {
+userSchema.methods.addToUserCart = async function ({ _id }) {
   try {
     const cartItems = this.cart.items;
 
@@ -85,7 +93,7 @@ userSchema.methods.addToUserCart = async function ({ _id, price }) {
   }
 };
 
-userSchema.methods.removeFromUserCart = async function ({ _id, price }) {
+userSchema.methods.removeFromUserCart = async function ({ _id }) {
   try {
     const cartItems = this.cart.items;
 
@@ -97,5 +105,21 @@ userSchema.methods.removeFromUserCart = async function ({ _id, price }) {
     throw err;
   }
 };
+
+userSchema.methods.updatePassword = async function (newPassword) {
+  try {
+    this.password = await bcrypt.hash(newPassword, 12);
+
+    // undefined val —> field cleared from doc **
+    this.resetToken = undefined;
+    this.resetTokenExpiry = undefined;
+
+    await this.save();
+  } catch (err) {
+    throw err;
+  }
+};
+
+userSchema.index({ resetToken: 1, resetTokenExpiry: 1 }); // compound index —> optimizes queries by getUserByToken **
 
 module.exports = model('User', userSchema);

@@ -13,8 +13,7 @@ const {
 const isAuth = require('../util/isAuth');
 
 router.get('/', renderProducts);
-router.get('/products', renderProducts);
-router.get('/products/:id', renderDetails);
+router.get('/products/:productId', renderDetails);
 
 router.get('/cart', isAuth, renderCart);
 router.get('/orders', isAuth, renderOrders);

@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongoose').Types;
 const Product = require('../models/Product');
 const Order = require('../models/Order');
-const getFlashMsgs = require('../util/getFlashMsgs');
+const convertFlashMsgs = require('../util/convertFlashMsgs');
 
 module.exports = {
   async renderProducts(req, res, next) {
@@ -11,8 +11,8 @@ module.exports = {
         pageTitle: 'All Products',
         path: '/',
         products,
-        successMsg: getFlashMsgs(req, 'success')[0]?.msg,
-        validationErrors: getFlashMsgs(req, 'error')
+        successMsg: convertFlashMsgs(req, 'success')[0]?.msg,
+        validationErrors: convertFlashMsgs(req, 'error')
       });
     } catch (err) {
       console.error('Error rendering Products:', err);
@@ -20,12 +20,12 @@ module.exports = {
     }
   },
   async renderDetails(req, res, next) {
-    const { id } = req.params;
+    const { productId } = req.params;
     try {
-      const product = await Product.findById(new ObjectId(id));
+      const product = await Product.findById(new ObjectId(productId));
       res.status(200).render('shop/product-detail', {
         pageTitle: product.title,
-        path: '/products',
+        path: '/',
         product
       });
     } catch (err) {

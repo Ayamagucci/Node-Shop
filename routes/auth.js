@@ -11,12 +11,12 @@ const {
   renderChangePassword,
   changePassword
 } = require('../controllers/auth');
-const isAuth = require('../util/isAuth');
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
 const { check, body, param } = require('express-validator');
-const findUserByToken = require('../util/findUserByToken');
+const bcrypt = require('bcryptjs');
 const { ObjectId } = require('mongoose').Types;
+const User = require('../models/User');
+const isAuth = require('../util/isAuth');
+const getUserByToken = require('../util/getUserByToken');
 
 router.get('/login', renderLogin);
 router.post(
@@ -25,22 +25,15 @@ router.post(
     body('email')
       .isEmail()
       .withMessage('Please enter a valid email address!')
-      .normalizeEmail()
-      .custom(async (email, { req }) => {
-        const user = await User.findOne({ email });
-        if (!user) {
+      .normalizeEmail(),
+    body('password')
+      .trim()
+      .custom(async (password, { req }) => {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user || !(await bcrypt.compare(password, user.password))) {
           throw new Error('Invalid email or password!');
         }
         req.user = user;
-        return true;
-      }),
-    body('password')
-      .trim()
-      // .isStrongPassword({minLength: 4, minSymbols: 1, minUpperCase: 1})
-      .custom(async (password, { req }) => {
-        if (!req.user || !(await bcrypt.compare(password, req.user.password))) {
-          throw new Error('Invalid email or password!');
-        }
         return true;
       })
   ],
@@ -67,9 +60,10 @@ router.post(
       'password',
       'Password must contain at least (4) alphanumeric characters!'
     )
+      // .isStrongPassword({minLength: 4, minSymbols: 1, minUpperCase: 1})
       .trim()
-      .isAlphanumeric()
-      .isLength({ min: 4 }),
+      .isLength({ min: 4 })
+      .isAlphanumeric(),
     body('confirmPassword')
       .trim()
       .custom((confirmPassword, { req }) => {
@@ -88,6 +82,7 @@ router.post(
   body('email')
     .isEmail()
     .withMessage('Please enter a valid email address!')
+    .bail() // stops validation chain if invalid email! **
     .normalizeEmail()
     .custom(async (email, { req }) => {
       const user = await User.findOne({ email });
@@ -100,38 +95,11 @@ router.post(
   sendResetToken
 );
 
-router.get(
-  '/reset/:resetToken',
-  param('resetToken').custom(async (resetToken, { req }) => {
-    const user = await findUserByToken(resetToken);
-    if (!user) {
-      throw new Error(
-        'Reset Token has expired or is invalid — please submit another reset request!'
-      );
-    }
-    req.user = user;
-    return true;
-  }),
-  renderChangePassword
-);
+router.get('/reset/:resetToken', getUserByToken, renderChangePassword);
 router.post(
   '/reset/:resetToken',
   [
-    body('userId')
-      .isString()
-      .custom(async (userId, { req }) => {
-        const user = await findUserByToken(
-          req.params.resetToken,
-          new ObjectId(userId)
-        );
-        if (!user) {
-          throw new Error(
-            'Reset Token has expired or is invalid — please submit another reset request!'
-          );
-        }
-        req.user = user;
-        return true;
-      }),
+    getUserByToken,
     body(
       'newPassword',
       'Password must contain at least (4) alphanumeric characters!'

@@ -1,8 +1,8 @@
 const { ObjectId } = require('mongoose').Types;
+const { validationResult } = require('express-validator');
 const Product = require('../models/Product');
 const User = require('../models/User');
-const { validationResult } = require('express-validator');
-const getFlashMsgs = require('../util/getFlashMsgs');
+const convertFlashMsgs = require('../util/convertFlashMsgs');
 
 module.exports = {
   async renderAdminProducts(req, res, next) {
@@ -12,8 +12,8 @@ module.exports = {
         pageTitle: 'Admin Products',
         path: '/admin/products',
         products,
-        successMsg: getFlashMsgs(req, 'success')[0]?.msg,
-        validationErrors: getFlashMsgs(req, 'error')
+        successMsg: convertFlashMsgs(req, 'success')[0]?.msg,
+        validationErrors: convertFlashMsgs(req, 'error')
       });
     } catch (err) {
       console.error('Error rendering Admin Products:', err);
@@ -26,8 +26,8 @@ module.exports = {
       path: '/admin/add-product',
       editing: false,
       userInputs: { title: '', price: '', description: '', imgURL: '' },
-      successMsg: getFlashMsgs(req, 'success')[0]?.msg,
-      validationErrors: getFlashMsgs(req, 'error')
+      successMsg: convertFlashMsgs(req, 'success')[0]?.msg,
+      validationErrors: convertFlashMsgs(req, 'error')
     });
   },
   async addProduct(req, res, next) {
@@ -75,8 +75,8 @@ module.exports = {
         editing,
         productId,
         userInputs: { title, price, description, imgURL },
-        successMsg: getFlashMsgs(req, 'success')[0]?.msg,
-        validationErrors: getFlashMsgs(req, 'error')
+        successMsg: convertFlashMsgs(req, 'success')[0]?.msg,
+        validationErrors: convertFlashMsgs(req, 'error')
       });
     } catch (err) {
       console.error('Error rendering Edit Form:', err);

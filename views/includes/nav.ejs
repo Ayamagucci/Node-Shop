@@ -2,9 +2,7 @@
   <nav class="main-header__nav">
     <ul class="main-header__item-list">
       <li class="main-header__item">
-        <a class="<%= path === '/products' ? 'active' : '' %>" href="/products"
-          >All Products</a
-        >
+        <a class="<%= path === '/' ? 'active' : '' %>" href="/">All Products</a>
       </li>
       <% if (loggedIn) { %>
       <li class="main-header__item">

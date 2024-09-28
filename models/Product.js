@@ -20,8 +20,11 @@ const productSchema = new Schema({
   vendor: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   }
 });
+
+productSchema.index({ _id: 1, vendor: 1 });
 
 module.exports = model('Product', productSchema);

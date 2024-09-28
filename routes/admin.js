@@ -8,42 +8,46 @@ const {
   editProduct,
   deleteProduct
 } = require('../controllers/admin');
-const isAuth = require('../util/isAuth');
 const { body } = require('express-validator');
+const isAuth = require('../util/isAuth');
 
 router.get('/products', isAuth, renderAdminProducts);
 
 router.get('/add-product', isAuth, renderAdder);
 router.post(
   '/add-product',
-  [
-    body('title', 'Title must contain at least (4) characters!')
-      .trim()
-      .isLength({ min: 4 }),
-    body('price', 'Please enter a valid price!').isFloat(),
-    body('description', 'Description must contain 4-400 characters!')
-      .trim()
-      .isLength({ min: 4, max: 400 }),
-    body('imgURL', 'Please enter a valid image URL!').trim().isURL()
-  ],
   isAuth,
+  [
+    body('title')
+      .trim()
+      .isLength({ min: 4 })
+      .withMessage('Title must contain at least (4) characters!'),
+    body('price').isFloat().withMessage('Please enter a valid price!'),
+    body('description')
+      .trim()
+      .isLength({ min: 4, max: 400 })
+      .withMessage('Description must contain 4-400 characters!'),
+    body('imgURL').trim().isURL().withMessage('Please enter a valid image URL!')
+  ],
   addProduct
 );
 
 router.get('/edit-product/:productId', isAuth, renderEditor);
 router.post(
   '/edit-product',
-  [
-    body('title', 'Title must contain at least (4) characters!')
-      .trim()
-      .isLength({ min: 4 }),
-    body('price', 'Please enter a valid price!').isFloat(),
-    body('description', 'Description must contain 4-400 characters!')
-      .trim()
-      .isLength({ min: 4, max: 400 }),
-    body('imgURL', 'Please enter a valid image URL!').trim().isURL()
-  ],
   isAuth,
+  [
+    body('title')
+      .trim()
+      .isLength({ min: 4 })
+      .withMessage('Title must contain at least (4) characters!'),
+    body('price').isFloat().withMessage('Please enter a valid price!'),
+    body('description')
+      .trim()
+      .isLength({ min: 4, max: 400 })
+      .withMessage('Description must contain 4-400 characters!'),
+    body('imgURL').trim().isURL().withMessage('Please enter a valid image URL!')
+  ],
   editProduct
 );
 
