@@ -1,5 +1,5 @@
 {
-  "name": "16-validation",
+  "name": "17-error-handling",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js"

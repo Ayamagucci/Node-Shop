@@ -53,12 +53,12 @@ const userSchema = new Schema({
     required: true
   },
   resetToken: {
-    type: String,
-    default: undefined
-  },
-  resetTokenExpiry: {
-    type: Date,
-    default: undefined
+    type: {
+      value: String,
+      expiry: Date
+    },
+    default: undefined,
+    index: true
   }
 });
 
@@ -109,17 +109,12 @@ userSchema.methods.removeFromUserCart = async function ({ _id }) {
 userSchema.methods.updatePassword = async function (newPassword) {
   try {
     this.password = await bcrypt.hash(newPassword, 12);
-
-    // undefined val —> field cleared from doc **
-    this.resetToken = undefined;
-    this.resetTokenExpiry = undefined;
+    this.resetToken = undefined; // undefined —> field cleared from doc **
 
     await this.save();
   } catch (err) {
     throw err;
   }
 };
-
-userSchema.index({ resetToken: 1, resetTokenExpiry: 1 }); // compound index —> optimizes queries by getUserByToken **
 
 module.exports = model('User', userSchema);

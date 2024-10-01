@@ -4,8 +4,10 @@ module.exports = async (req, res, next) => {
   const { resetToken } = req.params;
 
   const user = await User.findOne({
-    resetToken,
-    resetTokenExpiry: { $gt: Date.now() } // validation
+    resetToken: {
+      value: resetToken,
+      expiry: { $gt: Date.now() } // validation
+    }
   });
 
   if (!user) {

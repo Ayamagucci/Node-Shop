@@ -62,13 +62,20 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.use(({ name, message, stack }, req, res, _) => {
-  console.error('SERVER ERROR:', err);
-  res.status(500).render('error', {
-    pageTitle: name,
+app.use((_, res) => {
+  res.status(404).render('error/404', {
+    pageTitle: 'Page Not Found',
+    path: ''
+  });
+});
+
+// error-handling middleware must have (4) args **
+app.use((err, req, res, _) => {
+  res.status(500).render('error/500', {
+    pageTitle: err.name,
     path: '',
-    message,
-    stack: MODE === 'development' ? stack : undefined
+    message: err.message,
+    stack: MODE === 'development' ? err.stack : undefined
   });
 });
 

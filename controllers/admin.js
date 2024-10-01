@@ -8,7 +8,7 @@ module.exports = {
   async renderAdminProducts(req, res, next) {
     try {
       const products = await Product.find({ vendor: req.user._id });
-      res.status(200).render('admin/products', {
+      res.render('admin/products', {
         pageTitle: 'Admin Products',
         path: '/admin/products',
         products,
@@ -21,7 +21,7 @@ module.exports = {
     }
   },
   renderAdder(req, res) {
-    res.status(200).render('admin/edit-product', {
+    res.render('admin/edit-product', {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
       editing: false,
@@ -69,7 +69,7 @@ module.exports = {
       const { title, price, description, imgURL } = await Product.findById(
         new ObjectId(productId)
       );
-      res.status(200).render('admin/edit-product', {
+      res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing,
@@ -105,7 +105,7 @@ module.exports = {
       );
 
       req.flash('success', 'Product successfully updated!');
-      res.status(302).redirect('/admin/products');
+      res.redirect('/admin/products');
     } catch (err) {
       console.error(`Error editing product (${title}):`, err);
       next(err);
@@ -125,7 +125,7 @@ module.exports = {
       );
 
       req.flash('success', 'Product successfully deleted!');
-      res.status(302).redirect('/admin/products');
+      res.redirect('/admin/products');
     } catch (err) {
       console.error('Error deleting product:', err);
       next(err);

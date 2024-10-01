@@ -17,9 +17,16 @@ const transporter = createTransport({
   }
 });
 
+/* EXPLICIT STATUS CODES:
+  • non-200 statuses
+    (e.g. '201 Created', '400 Bad Request', etc.)
+
+  • non-302 statuses for redirects
+*/
+
 module.exports = {
   renderLogin(req, res) {
-    res.status(200).render('auth/login', {
+    res.render('auth/login', {
       pageTitle: 'User Login',
       path: '/login',
       userInputs: { email: '', password: '' },
@@ -44,14 +51,14 @@ module.exports = {
       await req.session.save();
 
       req.flash('success', 'Logged in successfully!');
-      res.status(302).redirect('/');
+      res.redirect('/');
     } catch (err) {
       console.error('Error logging in User:', err);
       next(err);
     }
   },
   renderRegister(req, res) {
-    res.status(200).render('auth/register', {
+    res.render('auth/register', {
       pageTitle: 'User Registration',
       path: '/register',
       userInputs: { name: '', email: '', password: '', confirmPassword: '' },
@@ -98,7 +105,7 @@ module.exports = {
     }
   },
   renderReset(req, res) {
-    res.status(200).render('auth/reset', {
+    res.render('auth/reset', {
       pageTitle: 'Password Reset',
       path: '/reset',
       userInputs: { email: '' },
@@ -128,8 +135,10 @@ module.exports = {
 
       (async () => {
         try {
-          req.user.resetToken = resetToken;
-          req.user.resetTokenExpiry = Date.now() + 1000 * 60 * 60;
+          req.user.resetToken = {
+            value: resetToken,
+            expiry: Date.now() + 1000 * 60 * 60
+          };
 
           await req.user.save();
 
@@ -147,7 +156,7 @@ module.exports = {
             'success',
             'Please check your email for a link to reset your password!'
           );
-          res.status(302).redirect('/reset');
+          res.redirect('/reset');
         } catch (err) {
           console.error('Error generating Reset Token:', err);
           next(err);
@@ -157,7 +166,7 @@ module.exports = {
   },
   renderChangePassword(req, res) {
     const { resetToken } = req.params;
-    res.status(200).render('auth/changePassword', {
+    res.render('auth/changePassword', {
       pageTitle: 'Password Reset',
       path: '/reset',
       resetToken,
@@ -185,7 +194,7 @@ module.exports = {
       await req.user.updatePassword(newPassword);
 
       req.flash('success', 'Password successfully updated!');
-      res.status(302).redirect('/login');
+      res.redirect('/login');
     } catch (err) {
       console.error('Error changing User Password:', err);
       next(err);
@@ -197,7 +206,7 @@ module.exports = {
         console.error('Failed to destroy session:', err);
         return next(err);
       }
-      res.status(302).redirect('/');
+      res.redirect('/');
     });
   }
 };

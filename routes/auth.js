@@ -11,9 +11,8 @@ const {
   renderChangePassword,
   changePassword
 } = require('../controllers/auth');
-const { check, body, param } = require('express-validator');
+const { check, body } = require('express-validator');
 const bcrypt = require('bcryptjs');
-const { ObjectId } = require('mongoose').Types;
 const User = require('../models/User');
 const isAuth = require('../util/isAuth');
 const getUserByToken = require('../util/getUserByToken');

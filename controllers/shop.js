@@ -7,7 +7,7 @@ module.exports = {
   async renderProducts(req, res, next) {
     try {
       const products = await Product.find({});
-      res.status(200).render('shop/product-list', {
+      res.render('shop/product-list', {
         pageTitle: 'All Products',
         path: '/',
         products,
@@ -23,7 +23,7 @@ module.exports = {
     const { productId } = req.params;
     try {
       const product = await Product.findById(new ObjectId(productId));
-      res.status(200).render('shop/product-detail', {
+      res.render('shop/product-detail', {
         pageTitle: product.title,
         path: '/',
         product
@@ -47,7 +47,7 @@ module.exports = {
           quantity
         };
       });
-      res.status(200).render('shop/cart', {
+      res.render('shop/cart', {
         pageTitle: 'Your Cart',
         path: '/cart',
         totalPrice: req.user.cart.totalPrice,
@@ -76,7 +76,7 @@ module.exports = {
       const product = await Product.findById(new ObjectId(id));
       await req.user.removeFromUserCart(product);
 
-      res.status(200).redirect('/cart');
+      res.redirect('/cart');
     } catch (err) {
       console.error('Error removing item from Cart:', err);
       next(err);
@@ -87,7 +87,7 @@ module.exports = {
       const orders = await Order.find({ buyer: req.user._id }).populate(
         'items.product'
       );
-      res.status(200).render('shop/orders', {
+      res.render('shop/orders', {
         pageTitle: 'Your Orders',
         path: '/orders',
         orders
@@ -120,7 +120,7 @@ module.exports = {
     }
   },
   renderCheckout(req, res) {
-    res.status(200).render('shop/checkout', {
+    res.render('shop/checkout', {
       pageTitle: 'Checkout',
       path: '/checkout'
     });
